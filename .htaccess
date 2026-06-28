@@ -1,0 +1,56 @@
+# AppVault — Apache Configuration
+# Clean URLs and security settings
+
+Options -Indexes
+DirectoryIndex index.php pages/index.php
+
+# Protect sensitive directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /app/
+
+    # Deny access to config directory
+    RewriteRule ^config/ - [F,L]
+
+    # Deny access to includes directory (direct access)
+    RewriteRule ^includes/ - [F,L]
+
+    # Deny access to database directory
+    RewriteRule ^database/ - [F,L]
+
+    # Optional: Clean APK detail URLs
+    # RewriteRule ^app/([0-9]+)$ pages/apk-detail.php?id=$1 [L,QSA]
+</IfModule>
+
+# Block access to hidden files (e.g. .git, .env)
+<FilesMatch "^\.">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# PHP settings
+<IfModule mod_php.c>
+    php_value upload_max_filesize 500M
+    php_value post_max_size 500M
+    php_value max_execution_time 300
+    php_value memory_limit 1024M
+</IfModule>
+
+# Set security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
